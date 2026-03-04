@@ -299,6 +299,16 @@ server.tool(
 // ---------------------------------------------------------------------------
 
 async function main() {
+  // Handle --install / --uninstall before starting the MCP server
+  const args = process.argv.slice(2);
+  if (args.includes("--install") || args.includes("--uninstall")) {
+    const { runInstaller } = await import("./installer.js");
+    const flags = args.filter((a) => a !== "--install");
+    if (args.includes("--install")) flags.unshift("--install");
+    await runInstaller(flags);
+    return;
+  }
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("tanstack-mcp server running on stdio");
