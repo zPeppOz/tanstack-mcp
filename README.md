@@ -1,4 +1,4 @@
-# tanstack-mcp
+# @g7aro/tanstack-mcp
 
 MCP server that wraps the [TanStack CLI](https://tanstack.com/cli) to provide programmatic access to TanStack documentation, libraries, add-ons, ecosystem partners, and project scaffolding.
 
@@ -32,7 +32,7 @@ Add to your MCP config (`~/.claude/claude_desktop_config.json` or project `.mcp.
   "mcpServers": {
     "tanstack": {
       "command": "npx",
-      "args": ["-y", "tanstack-mcp"]
+      "args": ["-y", "@g7aro/tanstack-mcp"]
     }
   }
 }

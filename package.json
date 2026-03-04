@@ -1,5 +1,5 @@
 {
-  "name": "tanstack-mcp",
+  "name": "@g7aro/tanstack-mcp",
   "version": "1.0.0",
   "description": "MCP server that wraps the TanStack CLI for programmatic access to docs, libraries, add-ons, and project scaffolding",
   "type": "module",
@@ -21,10 +21,20 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "npmrc": "^1.1.1",
     "zod": "^3.25.67"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
     "typescript": "^5.8.3"
-  }
+  },
+  "publishConfig": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zPeppOz/tanstack-mcp.git"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
 }
