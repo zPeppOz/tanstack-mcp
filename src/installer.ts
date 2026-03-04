@@ -10,10 +10,10 @@
  *   npx @g7aro/tanstack-mcp --uninstall          # remove from all clients
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { homedir, platform } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, basename } from "node:path";
 import { createInterface } from "node:readline";
 
 // ---------------------------------------------------------------------------
@@ -68,26 +68,26 @@ function commandExists(cmd: string): boolean {
 }
 
 function readJson(path: string): Record<string, unknown> {
-  try {
-    // Strip BOM + comments (JSONC support)
-    const raw = readFileSync(path, "utf-8")
-      .replace(/^\uFEFF/, "")
-      .replace(/\/\/.*$/gm, "")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
+  let raw = readFileSync(path, "utf-8");
+  if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1);
+  raw = raw.replace(/,\s*([}\]])/g, "$1");
+  return JSON.parse(raw);
 }
 
-function writeJson(path: string, data: unknown): void {
+function backupFile(path: string): string | null {
+  if (!existsSync(path)) return null;
+  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const backupPath = join(dirname(path), `.${basename(path)}.bak-${ts}`);
+  copyFileSync(path, backupPath);
+  return backupPath;
+}
+
+function writeJson(path: string, data: unknown, backup = true): string | null {
   mkdirSync(dirname(path), { recursive: true });
+  const bak = backup ? backupFile(path) : null;
   writeFileSync(path, JSON.stringify(data, null, 2) + "\n", "utf-8");
+  return bak;
 }
-
-// ---------------------------------------------------------------------------
-// Generic JSON-based installer (mcpServers key)
-// ---------------------------------------------------------------------------
 
 function jsonInstaller(
   configPath: string,
@@ -101,8 +101,10 @@ function jsonInstaller(
         (data[serverKey] as Record<string, unknown>) ?? {};
       servers[entryKey] = { ...SERVER_ENTRY };
       data[serverKey] = servers;
-      writeJson(configPath, data);
-      return `  → wrote ${configPath}`;
+      const bak = writeJson(configPath, data);
+      return bak
+        ? `  → wrote ${configPath} (backup: ${basename(bak)})`
+        : `  → wrote ${configPath}`;
     },
     uninstall() {
       if (!existsSync(configPath)) return `  → ${configPath} not found, skip`;
@@ -270,8 +272,10 @@ function defineClients(): ClientDef[] {
           enabled: true,
         };
         data["mcp"] = mcp;
-        writeJson(configPath, data);
-        return `  → wrote ${configPath}`;
+        const bak = writeJson(configPath, data);
+        return bak
+          ? `  → wrote ${configPath} (backup: ${basename(bak)})`
+          : `  → wrote ${configPath}`;
       },
       uninstall() {
         if (!existsSync(configPath))
@@ -310,8 +314,10 @@ function defineClients(): ClientDef[] {
           settings: {},
         };
         data["context_servers"] = servers;
-        writeJson(configPath, data);
-        return `  → wrote ${configPath}`;
+        const bak = writeJson(configPath, data);
+        return bak
+          ? `  → wrote ${configPath} (backup: ${basename(bak)})`
+          : `  → wrote ${configPath}`;
       },
       uninstall() {
         if (!existsSync(configPath))
@@ -360,8 +366,10 @@ function defineClients(): ClientDef[] {
         servers["servers"] = existing;
         servers["inputs"] = inputs;
         data["mcp"] = servers;
-        writeJson(configPath, data);
-        return `  → wrote ${configPath}`;
+        const bak = writeJson(configPath, data);
+        return bak
+          ? `  → wrote ${configPath} (backup: ${basename(bak)})`
+          : `  → wrote ${configPath}`;
       },
       uninstall() {
         if (!existsSync(configPath))
