@@ -1,3 +1,4 @@
+[![MCP Badge](https://lobehub.com/badge/mcp/zpeppoz-tanstack-mcp)](https://lobehub.com/mcp/zpeppoz-tanstack-mcp)
 # @g7aro/tanstack-mcp
 
 MCP server that wraps the [TanStack CLI](https://tanstack.com/cli) to provide programmatic access to TanStack documentation, libraries, add-ons, ecosystem partners, and project scaffolding.
